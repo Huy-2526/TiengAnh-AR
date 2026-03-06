@@ -86,50 +86,62 @@
 
         <a-entity camera></a-entity>
     </a-scene>
-    <div style="position: fixed; bottom: 20px; width: 100%; text-align: center; z-index: 1000;">
-    <button id="snap" style="padding: 15px; border-radius: 50%; border: 5px solid white; background: red; color: white; width: 70px; height: 70px; font-weight: bold; box-shadow: 0 0 10px rgba(0,0,0,0.5);">
-        CHỤP
+    <div style="position: fixed; bottom: 30px; left: 0; right: 0; display: flex; justify-content: center; align-items: center; z-index: 9999; pointer-events: none;">
+    <button id="snap" style="
+        pointer-events: auto;
+        width: 80px; 
+        height: 80px; 
+        border-radius: 50%; 
+        border: 6px solid rgba(255, 255, 255, 0.8); 
+        background: radial-gradient(circle, #ff4b2b 0%, #ff416c 100%); 
+        box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+        cursor: pointer;
+        outline: none;
+        transition: transform 0.1s active;">
+        <span style="color: white; font-weight: bold; font-family: Arial; font-size: 14px;">CHỤP</span>
     </button>
 </div>
+
+<style>
+    #snap:active { transform: scale(0.9); background: #d4145a; }
+</style>
     <script>
     document.getElementById('snap').addEventListener('click', function() {
-        // 1. Lấy scene và renderer từ A-Frame
-        let scene = document.querySelector('a-scene');
-        let renderer = scene.renderer;
-        let video = document.querySelector('video'); // Camera nền
+        // 1. Lấy các thành phần cần thiết
+        const scene = document.querySelector('a-scene');
+        const video = document.querySelector('video'); // Đây là camera nền
+        const canvasAR = scene.canvas; // Đây là lớp hình ảnh/chữ AR
 
-        // 2. Tạo canvas trung gian để trộn ảnh
-        let saverCanvas = document.createElement('canvas');
-        saverCanvas.width = video.videoWidth;
-        saverCanvas.height = video.videoHeight;
-        let ctx = saverCanvas.getContext('2d');
+        // 2. Tạo canvas trung gian để "trộn" 2 lớp lại
+        const finalCanvas = document.createElement('canvas');
+        finalCanvas.width = video.videoWidth;
+        finalCanvas.height = video.videoHeight;
+        const ctx = finalCanvas.getContext('2d');
 
-        // 3. Vẽ camera nền trước
-        ctx.drawImage(video, 0, 0, saverCanvas.width, saverCanvas.height);
+        // 3. Bước 1: Vẽ hình camera trước
+        ctx.drawImage(video, 0, 0, finalCanvas.width, finalCanvas.height);
 
-        // 4. Vẽ các vật thể AR (hình ảnh + chữ) lên trên
-        // A-Frame render ra một canvas riêng, mình chồng nó lên camera
-        ctx.drawImage(renderer.domElement, 0, 0, saverCanvas.width, saverCanvas.height);
+        // 4. Bước 2: Vẽ hình AR đè lên (phải lấy đúng tỷ lệ)
+        ctx.drawImage(canvasAR, 0, 0, finalCanvas.width, finalCanvas.height);
 
-        // 5. ĐÓNG DẤU WATERMARK
-        ctx.font = "bold 25px Arial";
-        ctx.fillStyle = "white";
+        // 5. Bước 3: Đóng dấu Watermark "Chụp trên LinguaLand"
+        ctx.font = "bold 30px Arial";
+        ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
         ctx.textAlign = "right";
-        ctx.shadowColor = "black"; // Thêm đổ bóng cho chữ dễ đọc
-        ctx.shadowBlur = 5;
+        ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
+        ctx.shadowBlur = 4;
         
-        // Vẽ dòng chữ ở góc dưới bên phải
-        ctx.fillText("Chụp trên LinguaLand", saverCanvas.width - 20, saverCanvas.height - 30);
+        // Vẽ ở góc dưới bên phải
+        ctx.fillText("Chụp trên LinguaLand", finalCanvas.width - 25, finalCanvas.height - 35);
 
-        // 6. Xuất file và tải về
-        let image = saverCanvas.toDataURL("image/png");
-        let link = document.createElement('a');
-        link.download = "LinguaLand-AR-" + Date.now() + ".png";
-        link.href = image;
+        // 6. Tải ảnh về máy
+        const dataURL = finalCanvas.toDataURL("image/png");
+        const link = document.createElement('a');
+        link.download = "LinguaLand_" + new Date().getTime() + ".png";
+        link.href = dataURL;
         link.click();
         
-        console.log("Bạn ơi, ảnh đã được lưu rồi nhé!");
+        console.log("Bạn ơi, đã chụp xong rồi nhé!");
     });
-</script>
-</body>
+</script></body>
 </html>
