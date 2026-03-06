@@ -86,5 +86,50 @@
 
         <a-entity camera></a-entity>
     </a-scene>
+    <div style="position: fixed; bottom: 20px; width: 100%; text-align: center; z-index: 1000;">
+    <button id="snap" style="padding: 15px; border-radius: 50%; border: 5px solid white; background: red; color: white; width: 70px; height: 70px; font-weight: bold; box-shadow: 0 0 10px rgba(0,0,0,0.5);">
+        CHỤP
+    </button>
+</div>
+    <script>
+    document.getElementById('snap').addEventListener('click', function() {
+        // 1. Lấy scene và renderer từ A-Frame
+        let scene = document.querySelector('a-scene');
+        let renderer = scene.renderer;
+        let video = document.querySelector('video'); // Camera nền
+
+        // 2. Tạo canvas trung gian để trộn ảnh
+        let saverCanvas = document.createElement('canvas');
+        saverCanvas.width = video.videoWidth;
+        saverCanvas.height = video.videoHeight;
+        let ctx = saverCanvas.getContext('2d');
+
+        // 3. Vẽ camera nền trước
+        ctx.drawImage(video, 0, 0, saverCanvas.width, saverCanvas.height);
+
+        // 4. Vẽ các vật thể AR (hình ảnh + chữ) lên trên
+        // A-Frame render ra một canvas riêng, mình chồng nó lên camera
+        ctx.drawImage(renderer.domElement, 0, 0, saverCanvas.width, saverCanvas.height);
+
+        // 5. ĐÓNG DẤU WATERMARK
+        ctx.font = "bold 25px Arial";
+        ctx.fillStyle = "white";
+        ctx.textAlign = "right";
+        ctx.shadowColor = "black"; // Thêm đổ bóng cho chữ dễ đọc
+        ctx.shadowBlur = 5;
+        
+        // Vẽ dòng chữ ở góc dưới bên phải
+        ctx.fillText("Chụp trên LinguaLand", saverCanvas.width - 20, saverCanvas.height - 30);
+
+        // 6. Xuất file và tải về
+        let image = saverCanvas.toDataURL("image/png");
+        let link = document.createElement('a');
+        link.download = "LinguaLand-AR-" + Date.now() + ".png";
+        link.href = image;
+        link.click();
+        
+        console.log("Bạn ơi, ảnh đã được lưu rồi nhé!");
+    });
+</script>
 </body>
 </html>
