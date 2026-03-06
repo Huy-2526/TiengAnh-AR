@@ -1,89 +1,75 @@
 <!DOCTYPE html>
+<html>
 <head>
-    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-    <title>LinguaLand - Học qua ảnh AR</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/three.js/build/ar.js"></script>
+    <title>LinguaLand - Học Tiếng Anh AR</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 </head>
 
-<body style='margin : 0px; overflow: hidden;'>
-<script>
-    var scene, camera, renderer, clock;
-    var arToolkitSource, arToolkitContext;
-    var markerRoot1;
+<body style="margin: 0px; overflow: hidden;">
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;">
+        
+        <a-marker type="pattern" url="ar/pattern-apple.patt">
+            <a-image src="images/apple.png" rotation="-90 0 0" width="1.2" height="1.2"></a-image>
+        </a-marker>
 
-    initialize();
-    animate();
+        <a-marker type="pattern" url="ar/pattern-banana.patt">
+            <a-image src="images/banana.png" rotation="-90 0 0" width="1.2" height="1.2"></a-image>
+        </a-marker>
 
-    function initialize() {
-        scene = new THREE.Scene();
-        let ambientLight = new THREE.AmbientLight(0xcccccc, 1.0);
-        scene.add(ambientLight);
+        <a-marker type="pattern" url="ar/pattern-bird.patt">
+            <a-image src="images/bird.png" rotation="-90 0 0" width="1.2" height="1.2"></a-image>
+        </a-marker>
 
-        camera = new THREE.Camera();
-        scene.add(camera);
+        <a-marker type="pattern" url="ar/pattern-blue.patt">
+            <a-image src="images/blue.png" rotation="-90 0 0" width="1.2" height="1.2"></a-image>
+        </a-marker>
 
-        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setClearColor(new THREE.Color('lightgrey'), 0);
-        renderer.setSize(640, 480);
-        renderer.domElement.style.position = 'absolute';
-        document.body.appendChild(renderer.domElement);
+        <a-marker type="pattern" url="ar/pattern-cat.patt">
+            <a-image src="images/cat.png" rotation="-90 0 0" width="1.2" height="1.2"></a-image>
+        </a-marker>
 
-        clock = new THREE.Clock();
+        <a-marker type="pattern" url="ar/pattern-cow.patt">
+            <a-image src="images/cow.png" rotation="-90 0 0" width="1.2" height="1.2"></a-image>
+        </a-marker>
 
-        arToolkitSource = new THREEx.ArToolkitSource({ sourceType: 'webcam' });
-        arToolkitSource.init(function onReady() { onResize(); });
-        window.addEventListener('resize', function () { onResize(); });
+        <a-marker type="pattern" url="ar/pattern-dog.patt">
+            <a-image src="images/dog.png" rotation="-90 0 0" width="1.2" height="1.2"></a-image>
+        </a-marker>
 
-        function onResize() {
-            arToolkitSource.onResize();
-            arToolkitSource.copySizeTo(renderer.domElement);
-            if (arToolkitContext.arController !== null) {
-                arToolkitSource.copySizeTo(arToolkitContext.arController.canvas);
-            }
-        }
+        <a-marker type="pattern" url="ar/pattern-fish.patt">
+            <a-image src="images/fish.png" rotation="-90 0 0" width="1.2" height="1.2"></a-image>
+        </a-marker>
 
-        arToolkitContext = new THREEx.ArToolkitContext({
-            cameraParametersUrl: 'https://raw.githack.com/AR-js-org/AR.js/master/data/data/camera_para.dat',
-            detectionMode: 'mono'
-        });
-        arToolkitContext.init(function onCompleted() {
-            camera.projectionMatrix.copy(arToolkitContext.getProjectionMatrix());
-        });
+        <a-marker type="pattern" url="ar/pattern-green.patt">
+            <a-image src="images/green.png" rotation="-90 0 0" width="1.2" height="1.2"></a-image>
+        </a-marker>
 
-        // THIẾT LẬP MARKER
-        markerRoot1 = new THREE.Group();
-        scene.add(markerRoot1);
-        let markerControls1 = new THREEx.ArMarkerControls(arToolkitContext, markerRoot1, {
-            type: 'pattern', 
-            patternUrl: "ar/so1.patt", // File .patt của Huy
-        });
+        <a-marker type="pattern" url="ar/pattern-moon.patt">
+            <a-image src="images/moon.png" rotation="-90 0 0" width="1.2" height="1.2"></a-image>
+        </a-marker>
 
-        // --- ĐOẠN LOAD ẢNH CỦA HUY Ở ĐÂY ---
-        let loader = new THREE.TextureLoader();
-        // Thay 'images/so1.png' bằng đường dẫn ảnh của Huy
-        loader.load('ar/so1.jpg', function (texture) {
-            let geometry = new THREE.PlaneGeometry(1.2, 1.2); // Kích thước ảnh
-            let material = new THREE.MeshBasicMaterial({ 
-                map: texture, 
-                transparent: true, // Để hiện được ảnh tách nền PNG
-                side: THREE.DoubleSide 
-            });
-            let mesh = new THREE.Mesh(geometry, material);
-            
-            mesh.rotation.x = -Math.PI/2; // Đặt ảnh nằm ngang trên marker
-            // Nếu muốn ảnh đứng thẳng trước mặt bé, Huy xóa dòng rotation ở trên đi
-            
-            markerRoot1.add(mesh);
-        });
-    }
+        <a-marker type="pattern" url="ar/pattern-orange.patt">
+            <a-image src="images/orange.png" rotation="-90 0 0" width="1.2" height="1.2"></a-image>
+        </a-marker>
 
-    function update() {
-        if (arToolkitSource.ready !== false) arToolkitContext.update(arToolkitSource.domElement);
-    }
+        <a-marker type="pattern" url="ar/pattern-red.patt">
+            <a-image src="images/red.png" rotation="-90 0 0" width="1.2" height="1.2"></a-image>
+        </a-marker>
 
-    function render() { renderer.render(scene, camera); }
-    function animate() { requestAnimationFrame(animate); update(); render(); }
-</script>
+        <a-marker type="pattern" url="ar/pattern-so1.patt">
+            <a-image src="images/so1.png" rotation="-90 0 0" width="1.2" height="1.2"></a-image>
+        </a-marker>
+
+        <a-marker type="pattern" url="ar/pattern-so2.patt">
+            <a-image src="images/so2.png" rotation="-90 0 0" width="1.2" height="1.2"></a-image>
+        </a-marker>
+
+        <a-marker type="pattern" url="ar/pattern-so3.patt">
+            <a-image src="images/so3.png" rotation="-90 0 0" width="1.2" height="1.2"></a-image>
+        </a-marker>
+
+        <a-entity camera></a-entity>
+    </a-scene>
 </body>
 </html>
