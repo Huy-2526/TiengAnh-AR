@@ -4,12 +4,57 @@
     <title>LinguaLand - Học Tiếng Anh AR</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <style>
+        /* Đảm bảo màn hình chiếm hết không gian */
+        body, html, a-scene {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+        }
+        /* Style cho nút chụp */
+        #snap-button-container {
+            position: fixed; /* Cố định vị trí */
+            bottom: 30px;    /* Cách đáy 30px */
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center; /* Căn giữa theo chiều ngang */
+            align-items: center;
+            z-index: 9999;   /* Đảm bảo nút nằm trên cùng */
+            pointer-events: none; /* Các sự kiện chuột/chạm sẽ đi xuyên qua container này */
+        }
+        #snap {
+            pointer-events: auto; /* Cho phép tương tác với nút */
+            width: 80px;
+            height: 80px;
+            border-radius: 50%; /* Làm tròn thành hình tròn */
+            border: 6px solid rgba(255, 255, 255, 0.8); /* Viền trắng mờ */
+            background: radial-gradient(circle, #ff4b2b 0%, #ff416c 100%); /* Gradient từ đỏ sang hồng */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4); /* Bóng đổ */
+            cursor: pointer;
+            outline: none; /* Bỏ outline khi focus */
+            transition: transform 0.1s; /* Hiệu ứng khi bấm */
+        }
+        #snap:active {
+            transform: scale(0.9); /* Co lại khi bấm */
+            background: #d4145a; /* Đổi màu khi bấm */
+        }
+        #snap span {
+            color: white;
+            font-weight: bold;
+            font-family: Arial, sans-serif; /* Font chữ rõ ràng */
+            font-size: 14px;
+            text-align: center;
+        }
+    </style>
 </head>
 
 <body style="margin: 0px; overflow: hidden;">
+    <!-- a-scene cần preserveDrawingBuffer: true để có thể lấy dữ liệu canvas -->
     <a-scene embedded arjs renderer="preserveDrawingBuffer: true;">
-  
-        
+
+        <!-- Các Marker và nội dung AR của bạn ở đây -->
         <a-marker type="pattern" url="ar/pattern-apple.patt">
             <a-image src="images/apple.jpg" rotation="-90 0 0" width="1.2" height="1.2"></a-image>
             <a-text value="APPLE: QUA TAO" color="#FFD700" align="center" position="0 1.5 0" rotation="0 0 0" width="4"></a-text>
@@ -87,62 +132,62 @@
 
         <a-entity camera></a-entity>
     </a-scene>
-    <div style="position: fixed; bottom: 30px; left: 0; right: 0; display: flex; justify-content: center; align-items: center; z-index: 9999; pointer-events: none;">
-    <button id="snap" style="
-        pointer-events: auto;
-        width: 80px; 
-        height: 80px; 
-        border-radius: 50%; 
-        border: 6px solid rgba(255, 255, 255, 0.8); 
-        background: radial-gradient(circle, #ff4b2b 0%, #ff416c 100%); 
-        box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-        cursor: pointer;
-        outline: none;
-        transition: transform 0.1s active;">
-        <span style="color: white; font-weight: bold; font-family: Arial; font-size: 14px;">CHỤP</span>
-    </button>
-</div>
 
-<style>
-    #snap:active { transform: scale(0.9); background: #d4145a; }
-</style>
+    <!-- Nút chụp được đặt ở đây -->
+    <div id="snap-button-container">
+        <button id="snap">
+            <span>CHỤP</span>
+        </button>
+    </div>
+
     <script>
-    document.getElementById('snap').addEventListener('click', function() {
-        // 1. Lấy các thành phần cần thiết
+        // Lấy các phần tử DOM cần thiết
         const scene = document.querySelector('a-scene');
-        const video = document.querySelector('video'); // Đây là camera nền
-        const canvasAR = scene.canvas; // Đây là lớp hình ảnh/chữ AR
+        // Lớp video nền từ camera AR.js
+        // Note: Nó có thể có ID khác nhau tùy phiên bản AR.js, thông thường là #arjs-video
+        const videoFeed = document.querySelector('#arjs-video') || document.querySelector('video');
+        // Canvas của A-Frame, nơi chứa các đối tượng AR
+        const arCanvas = scene.canvas;
 
-        // 2. Tạo canvas trung gian để "trộn" 2 lớp lại
-        const finalCanvas = document.createElement('canvas');
-        finalCanvas.width = video.videoWidth;
-        finalCanvas.height = video.videoHeight;
-        const ctx = finalCanvas.getContext('2d');
+        document.getElementById('snap').addEventListener('click', function() {
+            if (!videoFeed || !arCanvas) {
+                console.error("Không thể lấy đủ các thành phần camera hoặc canvas AR.");
+                return;
+            }
 
-        // 3. Bước 1: Vẽ hình camera trước
-        ctx.drawImage(video, 0, 0, finalCanvas.width, finalCanvas.height);
+            // Tạo một canvas trung gian để kết hợp cả hai lớp
+            const finalCanvas = document.createElement('canvas');
+            // Đảm bảo kích thước của finalCanvas bằng kích thước thực của video feed
+            finalCanvas.width = videoFeed.videoWidth;
+            finalCanvas.height = videoFeed.videoHeight;
+            const ctx = finalCanvas.getContext('2d');
 
-        // 4. Bước 2: Vẽ hình AR đè lên (phải lấy đúng tỷ lệ)
-        ctx.drawImage(canvasAR, 0, 0, finalCanvas.width, finalCanvas.height);
+            // 1. Vẽ lớp video feed (hình ảnh từ camera) lên finalCanvas
+            ctx.drawImage(videoFeed, 0, 0, finalCanvas.width, finalCanvas.height);
 
-        // 5. Bước 3: Đóng dấu Watermark "Chụp trên LinguaLand"
-        ctx.font = "bold 30px Arial";
-        ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-        ctx.textAlign = "right";
-        ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
-        ctx.shadowBlur = 4;
-        
-        // Vẽ ở góc dưới bên phải
-        ctx.fillText("Chụp trên LinguaLand", finalCanvas.width - 25, finalCanvas.height - 35);
+            // 2. Vẽ lớp canvas AR lên trên video feed
+            // Cần đảm bảo tỷ lệ vẽ của arCanvas khớp với videoFeed
+            ctx.drawImage(arCanvas, 0, 0, finalCanvas.width, finalCanvas.height);
 
-        // 6. Tải ảnh về máy
-        const dataURL = finalCanvas.toDataURL("image/png");
-        const link = document.createElement('a');
-        link.download = "LinguaLand_" + new Date().getTime() + ".png";
-        link.href = dataURL;
-        link.click();
-        
-        console.log("Bạn ơi, đã chụp xong rồi nhé!");
-    });
-</script></body>
+            // 3. Thêm Watermark (ví dụ: "Chụp trên LinguaLand")
+            ctx.font = "bold 30px Arial, sans-serif"; // Kích thước và font chữ lớn hơn
+            ctx.fillStyle = "rgba(255, 255, 255, 0.9)"; // Màu trắng với độ trong suốt
+            ctx.textAlign = "right"; // Căn phải
+            ctx.shadowColor = "rgba(0, 0, 0, 0.5)"; // Màu bóng
+            ctx.shadowBlur = 4; // Độ mờ của bóng
+
+            // Vị trí của watermark: cách mép phải 25px, cách mép dưới 35px
+            ctx.fillText("Chụp trên LinguaLand", finalCanvas.width - 25, finalCanvas.height - 35);
+
+            // 4. Chuyển đổi finalCanvas thành ảnh PNG và kích hoạt tải xuống
+            const dataURL = finalCanvas.toDataURL("image/png");
+            const link = document.createElement('a');
+            link.download = "LinguaLand_AR_Capture_" + new Date().getTime() + ".png"; // Tên file có thời gian
+            link.href = dataURL;
+            link.click(); // Tự động click để tải về
+
+            console.log("Đã chụp ảnh và chuẩn bị tải về!");
+        });
+    </script>
+</body>
 </html>
