@@ -1,112 +1,188 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
     <title>LinguaLand - Học Tiếng Anh AR</title>
-    <!-- Sử dụng các phiên bản ổn định -->
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
-        
+        /* Đảm bảo màn hình chiếm hết không gian */
+        body, html, a-scene {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+        }
+        /* Style cho nút chụp */
         #snap-button-container {
             position: fixed;
             bottom: 30px;
-            left: 0; right: 0;
+            left: 0;
+            right: 0;
             display: flex;
             justify-content: center;
-            z-index: 999;
+            align-items: center;
+            z-index: 9999;
             pointer-events: none;
         }
         #snap {
             pointer-events: auto;
-            width: 80px; height: 80px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
-            border: 5px solid white;
-            background: linear-gradient(135deg, #ff4b2b, #ff416c);
+            border: 6px solid rgba(255, 255, 255, 0.8);
+            background: radial-gradient(circle, #ff4b2b 0%, #ff416c 100%);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            cursor: pointer;
+            outline: none;
+            transition: transform 0.1s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #snap:active {
+            transform: scale(0.9);
+            background: #d4145a;
+        }
+        #snap span {
             color: white;
             font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            text-align: center;
         }
-        #snap:active { transform: scale(0.9); }
     </style>
 </head>
 
-<body>
-    <!-- SỬA LỖI 1: Khai báo renderer đúng cú pháp A-Frame -->
-    <a-scene 
-        embedded 
-        arjs="trackingBackend: artoolkit; sourceType: webcam; debugUIEnabled: false;"
-        renderer="preserveDrawingBuffer: true; logarithmicDepthBuffer: true; antialias: true; alpha: true;">
+<body style="margin: 0px; overflow: hidden;">
+    <!-- THÊM preserveDrawingBuffer vào renderer để Canvas không bị xóa dữ liệu khi chụp -->
+    <a-scene embedded arjs="trackingBackend: artoolkit; sourceType: webcam; debugUIEnabled: false;" 
+             renderer="preserveDrawingBuffer: true; alpha: true;">
 
-        <!-- Các Marker -->
+        <!-- 15 Marker của Huy -->
         <a-marker type="pattern" url="ar/pattern-apple.patt">
             <a-image src="images/apple.jpg" rotation="-90 0 0" width="1.2" height="1.2"></a-image>
-            <a-text value="APPLE: QUA TAO" color="#FFD700" align="center" position="0 0.5 0" rotation="-90 0 0" width="4"></a-text>
+            <a-text value="APPLE: QUA TAO" color="#FFD700" align="center" position="0 1.5 0" rotation="0 0 0" width="4"></a-text>
+        </a-marker>
+
+        <a-marker type="pattern" url="ar/pattern-banana.patt">
+            <a-image src="images/banana.jpg" rotation="-90 0 0" width="1.2" height="1.2"></a-image>
+            <a-text value="BANANA: QUA CHUOI" color="#FFD700" align="center" position="0 1.5 0" rotation="0 0 0" width="4"></a-text>
+        </a-marker>
+
+        <a-marker type="pattern" url="ar/pattern-orange.patt">
+            <a-image src="images/orange.jpg" rotation="-90 0 0" width="1.2" height="1.2"></a-image>
+            <a-text value="ORANGE: QUA CAM" color="#FFD700" align="center" position="0 1.5 0" rotation="0 0 0" width="4"></a-text>
+        </a-marker>
+        <a-marker type="pattern" url="ar/pattern-bird.patt">
+            <a-image src="images/bird.jpg" rotation="-90 0 0" width="1.2" height="1.2"></a-image>
+            <a-text value="BIRD: CON CHIM" color="#FFD700" align="center" position="0 1.5 0" rotation="0 0 0" width="4"></a-text>
         </a-marker>
 
         <a-marker type="pattern" url="ar/pattern-cat.patt">
             <a-image src="images/cat.jpg" rotation="-90 0 0" width="1.2" height="1.2"></a-image>
-            <a-text value="CAT: CON MEO" color="#FFD700" align="center" position="0 0.5 0" rotation="-90 0 0" width="4"></a-text>
+            <a-text value="CAT: CON MEO" color="#FFD700" align="center" position="0 1.5 0" rotation="0 0 0" width="4"></a-text>
         </a-marker>
 
-        <!-- Thêm các marker khác tương tự ở đây -->
+        <a-marker type="pattern" url="ar/pattern-cow.patt">
+            <a-image src="images/cow.jpg" rotation="-90 0 0" width="1.2" height="1.2"></a-image>
+            <a-text value="COW: CON BO" color="#FFD700" align="center" position="0 1.5 0" rotation="0 0 0" width="4"></a-text>
+        </a-marker>
+
+        <a-marker type="pattern" url="ar/pattern-dog.patt">
+            <a-image src="images/dog.jpg" rotation="-90 0 0" width="1.2" height="1.2"></a-image>
+            <a-text value="DOG: CON CHO" color="#FFD700" align="center" position="0 1.5 0" rotation="0 0 0" width="4"></a-text>
+        </a-marker>
+
+        <a-marker type="pattern" url="ar/pattern-fish.patt">
+            <a-image src="images/fish.jpg" rotation="-90 0 0" width="1.2" height="1.2"></a-image>
+            <a-text value="FISH: CON CA" color="#FFD700" align="center" position="0 1.5 0" rotation="0 0 0" width="4"></a-text>
+        </a-marker>
+
+        <a-marker type="pattern" url="ar/pattern-blue.patt">
+            <a-image src="images/blue.jpg" rotation="-90 0 0" width="1.2" height="1.2"></a-image>
+            <a-text value="BLUE: MAU XANH DUONG" color="#FFD700" align="center" position="0 1.5 0" rotation="0 0 0" width="4"></a-text>
+        </a-marker>
+
+        <a-marker type="pattern" url="ar/pattern-green.patt">
+            <a-image src="images/green.jpg" rotation="-90 0 0" width="1.2" height="1.2"></a-image>
+            <a-text value="GREEN: MAU XANH LA" color="#FFD700" align="center" position="0 1.5 0" rotation="0 0 0" width="4"></a-text>
+        </a-marker>
+
+        <a-marker type="pattern" url="ar/pattern-red.patt">
+            <a-image src="images/red.jpg" rotation="-90 0 0" width="1.2" height="1.2"></a-image>
+            <a-text value="RED: MAU DO" color="#FFD700" align="center" position="0 1.5 0" rotation="0 0 0" width="4"></a-text>
+        </a-marker>
+
+        <a-marker type="pattern" url="ar/pattern-moon.patt">
+            <a-image src="images/moon.jpg" rotation="-90 0 0" width="1.2" height="1.2"></a-image>
+            <a-text value="MOON: MAT TRANG" color="#FFD700" align="center" position="0 1.5 0" rotation="0 0 0" width="4"></a-text>
+        </a-marker>
+
+        <a-marker type="pattern" url="ar/pattern-so1.patt">
+            <a-image src="images/so1.jpg" rotation="-90 0 0" width="1.2" height="1.2"></a-image>
+        <a-text value="ONE: SO 1" color="#FFD700" align="center" position="0 1.5 0" rotation="0 0 0" width="4"></a-text>
+        </a-marker>
+
+        <a-marker type="pattern" url="ar/pattern-so2.patt">
+            <a-image src="images/so2.jpg" rotation="-90 0 0" width="1.2" height="1.2"></a-image>
+            <a-text value="TWO: SO 2" color="#FFD700" align="center" position="0 1.5 0" rotation="0 0 0" width="4"></a-text>
+        </a-marker>
+
+        <a-marker type="pattern" url="ar/pattern-so3.patt">
+            <a-image src="images/so3.jpg" rotation="-90 0 0" width="1.2" height="1.2"></a-image>
+            <a-text value="THREE: SO 3" color="#FFD700" align="center" position="0 1.5 0" rotation="0 0 0" width="4"></a-text>
+        </a-marker>
 
         <a-entity camera></a-entity>
     </a-scene>
 
     <div id="snap-button-container">
-        <button id="snap">CHỤP</button>
+        <button id="snap">
+            <span>CHỤP</span>
+        </button>
     </div>
 
     <script>
-        window.onload = function() {
+        document.getElementById('snap').addEventListener('click', function() {
             const scene = document.querySelector('a-scene');
-            const snapBtn = document.getElementById('snap');
+            // Tìm video feed tạo bởi AR.js
+            const videoFeed = document.querySelector('#arjs-video') || document.querySelector('video');
+            // Lấy canvas WebGL chính xác từ renderer
+            const arCanvas = scene.renderer.domElement;
 
-            snapBtn.addEventListener('click', function() {
-                // SỬA LỖI 2: Tìm video động vì AR.js tạo video sau khi khởi tạo
-                const videoFeed = document.querySelector('video#arjs-video') || document.querySelector('video');
-                const arCanvas = scene.canvas;
+            if (!videoFeed || !arCanvas) {
+                alert("Đang khởi tạo camera...");
+                return;
+            }
 
-                if (!videoFeed || !arCanvas) {
-                    alert("Đang khởi tạo camera, vui lòng đợi một chút!");
-                    return;
-                }
+            // Tạo canvas trung gian
+            const finalCanvas = document.createElement('canvas');
+            finalCanvas.width = videoFeed.videoWidth;
+            finalCanvas.height = videoFeed.videoHeight;
+            const ctx = finalCanvas.getContext('2d');
 
-                // Thiết lập kích thước
-                const targetWidth = videoFeed.videoWidth;
-                const targetHeight = videoFeed.videoHeight;
+            // 1. Vẽ nền camera
+            ctx.drawImage(videoFeed, 0, 0, finalCanvas.width, finalCanvas.height);
 
-                const finalCanvas = document.createElement('canvas');
-                finalCanvas.width = targetWidth;
-                finalCanvas.height = targetHeight;
-                const ctx = finalCanvas.getContext('2d');
+            // 2. ÉP RENDER LẠI cảnh AR trước khi copy (Fix lỗi không có lớp AR)
+            scene.renderer.render(scene.object3D, scene.camera);
 
-                // Vẽ camera background
-                ctx.drawImage(videoFeed, 0, 0, targetWidth, targetHeight);
+            // 3. Vẽ lớp AR lên trên
+            ctx.drawImage(arCanvas, 0, 0, finalCanvas.width, finalCanvas.height);
 
-                // Vẽ nội dung AR (Canvas của A-Frame)
-                ctx.drawImage(arCanvas, 0, 0, targetWidth, targetHeight);
+            // 4. Watermark
+            ctx.font = "bold 30px Arial";
+            ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+            ctx.textAlign = "right";
+            ctx.fillText("Chụp trên LinguaLand", finalCanvas.width - 25, finalCanvas.height - 35);
 
-                // Thêm Watermark
-                ctx.font = "bold 25px Arial";
-                ctx.fillStyle = "white";
-                ctx.textAlign = "right";
-                ctx.fillText("Chụp trên LinguaLand", targetWidth - 20, targetHeight - 20);
-
-                // Xuất file
-                finalCanvas.toBlob(function(blob) {
-                    const url = URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    link.download = `LinguaLand_${Date.now()}.png`;
-                    link.href = url;
-                    link.click();
-                    setTimeout(() => URL.revokeObjectURL(url), 100);
-                }, "image/png");
-            });
-        };
+            // 5. Xuất ảnh
+            const dataURL = finalCanvas.toDataURL("image/png");
+            const link = document.createElement('a');
+            link.download = "LinguaLand_Capture_" + Date.now() + ".png";
+            link.href = dataURL;
+            link.click();
+        });
     </script>
 </body>
 </html>
