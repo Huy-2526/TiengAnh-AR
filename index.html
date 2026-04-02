@@ -155,38 +155,71 @@
                 return;
             }
 
+            // --- Tối ưu hóa: Sử dụng kích thước cố định hoặc giảm kích thước ảnh chụp ---
+            // Kích thước bạn muốn cho ảnh chụp (ví dụ: 1280x720).
+            // Có thể thử nghiệm với các giá trị khác nhau để cân bằng giữa chất lượng và tốc độ.
+            // Nếu bạn muốn giữ nguyên độ phân giải gốc, hãy bỏ comment các dòng sau và comment các dòng targetWidth/targetHeight.
+            const targetWidth = 1280;
+            const targetHeight = Math.round(videoFeed.videoHeight * (targetWidth / videoFeed.videoWidth)); // Giữ tỷ lệ
+
+            // Nếu muốn độ phân giải gốc, sử dụng:
+            // const targetWidth = videoFeed.videoWidth;
+            // const targetHeight = videoFeed.videoHeight;
+
             // Tạo một canvas trung gian để kết hợp cả hai lớp
             const finalCanvas = document.createElement('canvas');
-            // Đảm bảo kích thước của finalCanvas bằng kích thước thực của video feed
-            finalCanvas.width = videoFeed.videoWidth;
-            finalCanvas.height = videoFeed.videoHeight;
+            finalCanvas.width = targetWidth;
+            finalCanvas.height = targetHeight;
             const ctx = finalCanvas.getContext('2d');
 
-            // 1. Vẽ lớp video feed (hình ảnh từ camera) lên finalCanvas
-            ctx.drawImage(videoFeed, 0, 0, finalCanvas.width, finalCanvas.height);
+            // 1. Vẽ lớp video feed (hình ảnh từ camera) lên finalCanvas theo kích thước mục tiêu
+            ctx.drawImage(videoFeed, 0, 0, targetWidth, targetHeight);
 
-            // 2. Vẽ lớp canvas AR lên trên video feed
-            // Cần đảm bảo tỷ lệ vẽ của arCanvas khớp với videoFeed
-            ctx.drawImage(arCanvas, 0, 0, finalCanvas.width, finalCanvas.height);
+            // 2. Vẽ lớp canvas AR lên trên video feed theo kích thước mục tiêu
+            ctx.drawImage(arCanvas, 0, 0, targetWidth, targetHeight);
 
             // 3. Thêm Watermark (ví dụ: "Chụp trên LinguaLand")
-            ctx.font = "bold 30px Arial, sans-serif"; // Kích thước và font chữ lớn hơn
+            // Điều chỉnh font size cho phù hợp với kích thước ảnh
+            const watermarkFontSize = Math.max(14, Math.round(targetWidth / 40)); // Cỡ font tối thiểu 14, tỉ lệ với width
+            const watermarkPaddingRight = Math.max(10, Math.round(targetWidth / 40));
+            const watermarkPaddingBottom = Math.max(15, Math.round(targetHeight / 40));
+
+            ctx.font = `bold ${watermarkFontSize}px Arial, sans-serif`; // Kích thước và font chữ rõ ràng
             ctx.fillStyle = "rgba(255, 255, 255, 0.9)"; // Màu trắng với độ trong suốt
             ctx.textAlign = "right"; // Căn phải
             ctx.shadowColor = "rgba(0, 0, 0, 0.5)"; // Màu bóng
             ctx.shadowBlur = 4; // Độ mờ của bóng
 
-            // Vị trí của watermark: cách mép phải 25px, cách mép dưới 35px
-            ctx.fillText("Chụp trên LinguaLand", finalCanvas.width - 25, finalCanvas.height - 35);
+            // Vị trí của watermark: cách mép phải và dưới một khoảng nhất định
+            ctx.fillText("Chụp trên LinguaLand", targetWidth - watermarkPaddingRight, targetHeight - watermarkPaddingBottom);
 
-            // 4. Chuyển đổi finalCanvas thành ảnh PNG và kích hoạt tải xuống
-            const dataURL = finalCanvas.toDataURL("image/png");
-            const link = document.createElement('a');
-            link.download = "LinguaLand_AR_Capture_" + new Date().getTime() + ".png"; // Tên file có thời gian
-            link.href = dataURL;
-            link.click(); // Tự động click để tải về
+            // 4. Chuyển đổi finalCanvas thành ảnh PNG và kích hoạt tải xuống bằng toBlob()
+            finalCanvas.toBlob(function(blob) {
+                if (!blob) {
+                    console.error("Không thể tạo blob từ canvas.");
+                    return;
+                }
 
-            console.log("Đã chụp ảnh và chuẩn bị tải về!");
+                // Tạo URL tạm thời từ blob
+                const url = URL.createObjectURL(blob);
+
+                // Tạo thẻ anchor để tải xuống
+                const link = document.createElement('a');
+                link.download = "LinguaLand_AR_Capture_" + new Date().getTime() + ".png"; // Tên file có thời gian
+                link.href = url;
+
+                // Kích hoạt sự kiện click để tải về
+                link.click();
+
+                // Giải phóng URL object sau khi nó được sử dụng để tải xuống
+                // Điều này giúp giải phóng bộ nhớ
+                // Có thể cần trì hoãn một chút để đảm bảo tải xuống bắt đầu
+                setTimeout(() => {
+                    URL.revokeObjectURL(url);
+                }, 100); // Trì hoãn 100ms trước khi giải phóng URL
+
+                console.log("Đã chụp ảnh và chuẩn bị tải về!");
+            }, "image/png"); // Chỉ định định dạng là PNG
         });
     </script>
 </body>
